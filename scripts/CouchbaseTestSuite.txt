@@ -1,0 +1,62 @@
+*** Settings ***
+Library   CouchbaseLibrary
+Library   OperatingSystem
+Library   HttpLibrary.HTTP
+Resource  couchbase_variables.txt
+Suite Setup   Set Couchbase Server  ${hostname}  ${port}  ${bucketname}  ${bucketpassword}
+Suite Teardown  
+
+*** Variables ***
+${JsonFile}   data\\jsonSample.json
+${Key}        1234abcdefgh
+${KeyNetClient}  cottrell_brewing-old_yankee_ale
+${KeyJavaClient}   692b7919-5712-4784-b3de-ac6c39a9d00a
+
+*** Test Cases ***
+Write Document To Couchbase
+    [Documentation]  Write document to the couchbase server using the python couchbase client library
+    ...  Providing the document and the key
+    [Tags]  couchbase
+    ${JSONSimple}=  Get File  ${JsonFile}
+    Should Be Valid Json  ${JSONSimple}
+    Set Suite Variable   ${JSONSimple}   ${JSONSimple}
+    ${output}=  Write Document To Couchbase  ${Key}  ${JSONSimple}
+    Log  ${output}
+    
+Read Document From Couchbase
+    [Documentation]  Read a document from the couchbase server using the python couchbase client library
+    ...  Provide the key and document is returned in json format
+    [Tags]  couchbase
+    ${jsondocument}=  Read Document From Couchbase  ${Key}
+    Log Json   ${jsondocument}   
+    Should Be Valid Json  ${jsondocument}  
+    
+Change Time To Live Of Document 
+    [Documentation]   Change time to live of an existing document
+    ...  Set Quiet To False
+    ...  extendTimeToLiveOfDocument(key, IsQuiet, timeToLive)
+    ...  parameters are document Key, IsQuiet and TimeToLive
+    [Tags]  couchbase
+    ${ttl}=  Convert To Integer  1 
+    Extend Time To Live Of Document  ${Key}  False   ${ttl}  
+ 
+Delete Document From Couchbase
+    [Documentation]  Delete a document from the couchbase server by providing the key
+    ...   IF the key doesn't exist report an error
+    [Tags]  couchbase
+    Delete Document From Couchbase  ${Key}   False  
+    
+Change Time To Live Of Document Quiet
+    [Documentation]   Change time to live of an existing document
+    ...  The Document has been deleted and Quiet Set To True
+    ...  extendTimeToLiveOfDocument(key, IsQuiet, timeToLive)
+    ...  parameters are document Key, IsQuiet and TimeToLive
+    [Tags]  couchbase
+    ${ttl}=  Convert To Integer  1
+    Extend Time To Live Of Document  ${Key}  True   ${ttl}  
+
+Delete Document From Couchbase Quiet
+    [Documentation]  Delete a document from the couchbase server by providing the key
+    ...   IF the key doesn't exist don't report an error
+    [Tags]  couchbase
+    Delete Document From Couchbase  ${Key}   True      

@@ -1,0 +1,11 @@
+{
+	"foo": {
+		"anArray":[
+			{"prop": 44}
+		],
+		"another prop":
+			{
+			"baz": "A string"
+		    }
+	}
+}
